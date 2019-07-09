@@ -1,0 +1,34 @@
+{
+  "name": "mycesiumflight",
+  "version": "1.0.0",
+  "description": "a Cesium based webgl 3D photorealistic flight simulator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shadel/myCesiumflight.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shadel/myCesiumflight/issues"
+  },
+  "homepage": "https://github.com/shadel/myCesiumflight#readme",
+  "dependencies": {
+    "async": "^1.5.2",
+    "colors": "^1.0.3",
+    "corser": "^2.0.1",
+    "ecstatic": "^3.3.2",
+    "he": "^1.2.0",
+    "http-server": "^0.11.1",
+    "mime": "^1.6.0",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "qs": "^2.3.3",
+    "url-join": "^2.0.5",
+    "wordwrap": "^0.0.3"
+  },
+  "devDependencies": {}
+}

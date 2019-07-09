@@ -1,7 +1,10 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
 	"name": "Node.js (latest LTS)",
-	"dockerFile": "Dockerfile",
+	
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "docker-js",
+	"workspaceFolder": "/workspace",
 
 	// Uncomment the next line if you want to publish any ports.
 	// "appPort": [],
@@ -14,5 +17,10 @@
 
 	"extensions": [
 		"dbaeumer.vscode-eslint"
-	]
+	],
+	"settings": {
+		"remote.extensionKind": {
+			"peterjausovec.vscode-docker": "workspace"
+		}
+	}
 }
