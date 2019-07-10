@@ -117,7 +117,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 //to get more than per ip apiusage quota (some thousands to 20 thousands per day) (its free)
     </script>
     <script src='https://code.responsivevoice.org/responsivevoice.js' type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAtMytAAEaQcCHnaeEpqwHmtCUwlURr63E" type="text/javascript"></script>
     <script
         src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/bousspng.js"></script>
     <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/base64binary.js"></script>
@@ -818,7 +818,8 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
                 auxvar = parseInt(Math.max(-1000, (tloading2 - tframe) / 1000));
                 auxvar4 = parseInt(Math.max(-1000, (tloading - tframe) / 1000));
                 auxvar2 = iicomm;
-                myview(); moveaircraft();
+                myview(); 
+                moveaircraft();
                 if (tbridge == 1 && taskgetterrainheightbridge == 1) { getterrainheightbridge(); }
                 if (tbuilding == 1) { testupdatebuildmesh(); }//before testgetways2()
                 testgetways(); testradio();
