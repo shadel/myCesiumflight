@@ -14,7 +14,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 </script-->
     <base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/">
     <script
-        src="https://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
+        src="http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport"
@@ -112,7 +112,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
         km/h
     </div>
     <script>
-        var apikey = '&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
+        var apikey = '&key=AIzaSyAtMytAAEaQcCHnaeEpqwHmtCUwlURr63E';
 //put here your google static map apikey (=> https://developers.google.com/maps/documentation/static-maps/get-api-key)
 //to get more than per ip apiusage quota (some thousands to 20 thousands per day) (its free)
     </script>
@@ -398,11 +398,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             myCesium = Cesium;
             //myviewer.Scene.contextOptions.webgl.alpha=true;
             //myviewer.Scene.creditContainer=document.getElementById("credit");
-            cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-                url: 'https://assets.agi.com/stk-terrain/world',
-                requestWaterMask: true,
-                requestVertexNormals: true
-            });
+            cesiumTerrainProviderMeshes = Cesium.createWorldTerrain();
             // setup alternative terrain providers
             ellipsoidProvider = new Cesium.EllipsoidTerrainProvider({
                 requestWaterMask: true,
@@ -1998,7 +1994,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
         }
         function addaircraft() {
             //createModel('../../SampleData/models/CesiumAir/Cesium_Air.glb', 300);
-            createModel('https://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', 300);
+            createModel('http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', 300);
             //createModel('../../Sandcastle/myApps/SC001jet.glb', 300);
             //createModel('../../Sandcastle/myApps/c150.glb', 300);
         }
