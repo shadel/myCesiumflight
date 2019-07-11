@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- myCesiumflight a program by NGUYEN.Chung (freeware 2016) -->
+    <!--script>
+var myurl=document.location.href;//autolaunch as localhost:8080 if in local mode
+//http://localhost:8080/  file:///D:/cesium/Apps/Sandcastle/gallery/Camera_.html
+if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
+   var folder="/cesium/";
+   var i=myurl.indexOf(folder)+folder.length;
+   document.location.href="http://localhost:8080/"+myurl.substr(i,999);
+}
+</script-->
+    <base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/">
+    <script
+        src="http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>myCesiumflight</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script type="text/javascript" src="../../../ThirdParty/requirejs-2.1.20/require.js"></script>
+    <script type="text/javascript">
+        require.config({
+            baseUrl: '../../../Source',
+            waitSeconds: 60
+        });
+    </script>
+</head>
+
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();">
+    <!--style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
+<-->
+    <style>
+        @import url(../templates/bucket.css);
+
+        #cesiumContainer {
+            width: 98%;
+            height: 98%;
+            overflow: hidden;
+        }
+    </style>
+    <!--div id="cesiumContainer" class="fullSize"></div-->
+    <div id="cesiumContainer"></div>
+    <div id="loadingOverlay">
+        <h1>Loading...</h1>
+    </div>
+    <div id="toolbar" style="position:absolute;top:0px;left:0px;z-index:300;">
+        <a id="toggleLighting"></a>
+        <a id="fog"></a>
+        <div>B,N => motor -/+</div>
+        <div>arrows => turn / H => help</div>
+        <div id="fps">fps</div>
+        <div id="msg">msg</div>
+        <div id="msg2">msg2</div>
+        <div id="msg3">msg3</div>
+        <div id="msghttp">msghttp</div>
+        <div id="msghttp2">msghttp2</div>
+        <div>
+            <select id="combo" onChange="subcombo();" onblur="" onfocus="">
+                <option id="flyto">flyto</option>
+                <option id="deauville marinas">deauville marinas</option>
+                <option id="deauville plage">deauville plage</option>
+                <option id="trouville plage">trouville plage</option>
+                <option id="nancy">nancy</option>
+                <option id="crickvenica">crickvenica</option>
+                <option id="paris tolbiac">paris tolbiac</option>
+                <option id="paris defense">paris defense</option>
+                <option id="ivry romain roland">ivry romain roland</option>
+                <option id="orsay">orsay</option>
+                <option id="le barcares">le barcares</option>
+                <option id="jerusalem">jerusalem</option>
+                <option id="marseille">marseille</option>
+                <option id="nice">nice</option>
+                <option id="arcachon">arcachon</option>
+                <option id="grenoble">grenoble</option>
+                <option id="san francisco">san francisco</option>
+                <option id="new york">new york</option>
+                <option id="atlanta">atlanta</option>
+                <option id="rio">rio</option>
+                <option id="hong kong">hong kong</option>
+                <option id="athenes">athenes</option>
+                <option id="perth">perth</option>
+                <option id="le caire">le caire</option>
+                <option id="washington">washington</option>
+                <option id="tajmahal">tajmahal</option>
+            </select>
+        </div>
+        <div>
+            <select id="terrain" onChange="subcomboterrain();" onblur="" onfocus="">
+                <option id="stk">stk terrain</option>
+                <option id="ellipsoid">ellipsoid</option>
+                <option id="vrterrain">vr terrain</option>
+            </select>
+        </div>
+        <div id="msgradio" style="width:220px;">msgradio</div>
+        <br />
+    </div>
+    <div id="credit" style="position:absolute;top:400px;left:0px;width:420px;"></div>
+    <div id="mapdiv" style="position:absolute;top:4028px;left:0px;width:97%;height:95%;">
+    </div>
+    <div id="mapdivmsg" style="position:absolute;top:4000px;left:0px;width:400px;height:20px;">
+        <input type="text" id="msgmap" onKeyUp="quitmsgmap();" maxlength="80" size="80" />
+    </div>
+    <div id="north" style="position:absolute;top:3000px;left:0px;width:8px;height:8px;">
+        <a>N</a>
+    </div>
+    <div id="speed" style="position:absolute;top:3000px;left:0px;width:30px;height:30px;">
+        km/h
+    </div>
+    <script>
+        var apikey = '&key=AIzaSyAtMytAAEaQcCHnaeEpqwHmtCUwlURr63E';
+//put here your google static map apikey (=> https://developers.google.com/maps/documentation/static-maps/get-api-key)
+//to get more than per ip apiusage quota (some thousands to 20 thousands per day) (its free)
+    </script>
+    <script src='https://code.responsivevoice.org/responsivevoice.js' type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAtMytAAEaQcCHnaeEpqwHmtCUwlURr63E" type="text/javascript"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/bousspng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/base64binary.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/avion2mp3.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/pneump3.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit1png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome2jpg.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome3jpg.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/radar2png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetjpg.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14objtxt.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14jpg.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14bluepng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14graypng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/eiffeltowerpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/libertystatuepng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/christriopng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/domerockpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/gizahpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/capitolepng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/tajmahalpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/buddahpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/airporttower256png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeobjtxt.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgepng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeorangepng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/sunpng.js"></script>
+    <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/cloudpng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128png.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonobjtxt.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonjpg.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128bluepng.js"></script>
+    <script
+        src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128blue2png.js"></script>
+    <!--script src="http://localhost:8080/Apps/Sandcastle/gallery/building128bluepng.js" ></script-->
+    <!--script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonjpg.js" ></script-->
+    <script id="webaudio">
+        try { if (localStorage) { }; } catch (e) { localStorage = null; alert("localStorage is not supported"); };
+        var twebaudio = 1;
+        try {
+            var audioctx = new (window.AudioContext || window.webkitAudioContext)();
+            var songlength;
+            function loadsound(source, url) {
+                source.request = new XMLHttpRequest();
+                source.request.open('GET', url, true);
+                source.request.responseType = 'arraybuffer';
+                source.request.onload = function () {
+                    var audioData = source.request.response;
+                    audioctx.decodeAudioData(audioData, function (buffer) {
+                        //myBuffer = buffer;
+                        songlength = buffer.duration;
+                        source.buffer = buffer;
+                        source.playbackRate.value = 1.0;
+                        //source.connect(audioctx.destination);
+                        source.loopStart = 0.5;
+                        source.loopEnd = songlength - 0.5;
+                        source.gainNode = audioctx.createGain();
+                        source.connect(source.gainNode);
+                        source.gainNode.connect(audioctx.destination);
+                        source.gainNode.gain.value = 1.0;
+                        if (source.onload) { source.onload(); }
+                    },
+                        function (e) { alert("Error with decoding audio data" + e.err); });
+                }
+                source.request.send();
+            }
+            function loadsound64(source, data) {
+                var audioData = Base64Binary.decodeArrayBuffer(data.split(",")[1]);
+                audioctx.decodeAudioData(audioData, function (buffer) {
+                    //myBuffer = buffer;
+                    songlength = buffer.duration;
+                    source.buffer = buffer;
+                    source.playbackRate.value = 1.0;
+                    //source.connect(audioctx.destination);
+                    source.loopStart = 0.5;
+                    source.loopEnd = songlength - 0.5;
+                    source.gainNode = audioctx.createGain();
+                    source.connect(source.gainNode);
+                    source.gainNode.connect(audioctx.destination);
+                    source.gainNode.gain.value = 1.0;
+                    if (source.onload) { source.onload(); }
+                    audioData = null;
+                },
+                    function (e) { alert("Error with decoding audio data" + e.err); });
+            }
+            function setvol(source, vol) {
+                if (source.gainNode) { source.gainNode.gain.value = vol; }
+            }
+            function setspeed(source, speed) {
+                if (source.playbackRate) { source.playbackRate.value = speed; }
+            }
+            function playloop(source) { source.loop = true; source.start(0); }
+            function playsound(source) {
+                if (!source.gainNode) { return; }
+                var sourcex = audioctx.createBufferSource(); // creates a sound source
+                sourcex.buffer = source.buffer;  // tell the source which sound to play
+                sourcex.loop = false;
+                if (source.playbackRate) {
+                    if (sourcex.playbackRate) { sourcex.playbackRate.value = source.playbackRate.value; }
+                }
+                // sourcex.connect(source.gainNode);       // connect the source to the audioctx's destination (the speakers)
+                // sourcex.start(0);                           // play the source now                                           // note: on older systems, may have to use deprecated noteOn(time);
+            }
+            //var wav="mp3",browser="";
+            //if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1){wav="ogg";browser="firefox";};
+            //if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){wav="wav";};
+            //alert(navigator.userAgent+" "+wav);
+            var audiosrc = "";
+            var myaudio = audioctx.createBufferSource();
+            myaudio.volume = 0;
+            // loadsound64(myaudio, avion2mp3);
+            myaudio.onload = function () {
+                setTimeout("playloop(myaudio);", 300);
+                setTimeout("setvol(myaudio,0.3);", 300);
+                setTimeout("setspeed(myaudio,1.0);", 300);
+            }
+            var myaudiojet = audioctx.createBufferSource();
+            myaudiojet.volume = 0;
+            // loadsound64(myaudiojet, jet4mp3);
+            myaudiojet.onload = function () {
+                setTimeout("playloop(myaudiojet);", 320);
+                setTimeout("setvol(myaudiojet,0.003);", 320);
+                setTimeout("setspeed(myaudiojet,1.0);", 320);
+            }
+            var myaudiopneu = audioctx.createBufferSource();
+            //audiosrc=folder+"pneu."+wav;
+            myaudiopneu.volume = 0;
+            loadsound64(myaudiopneu, pneump3);
+            myaudiopneu.onload = function () {
+                setTimeout("playsound(myaudiopneu);", 500);
+                setTimeout("setvol(myaudiopneu,0.4);", 500);
+                setTimeout("setspeed(myaudiopneu,1.0);", 500);
+            }
+            var tpneu = 0, tsoundpneu = 0;
+            function soundpneu() {
+                if (tframe > tsoundpneu + 1000) {
+                    tsoundpneu = tframe;
+                    // playsound(myaudiopneu);
+                }
+            }
+            function closewebaudio() {
+                myaudio.buffer = null;
+                myaudiojet.buffer = null;
+                myaudiopneu.buffer = null;
+            }
+        } catch (e) { twebaudio = 0; };
+//if(twebaudio==1){alert(tpneu);soundpneu();}
+    </script>
+    <script id="cesium_sandcastle_script">
+        var cssscale = 2, cssscaley = 1.4, windx = 1000, windy = 700;
+        var prefix = "myCesiumflight_";
+        if (document.location.href.indexOf("myCesiumflight1") > 0) { prefix = "myCesiumflight1_"; }
+        if (document.location.href.indexOf("myCesiumflight2") > 0) { prefix = "myCesiumflight2_"; }
+        if (document.location.href.indexOf("myCesiumflight3") > 0) { prefix = "myCesiumflight3_"; }
+        function removestorage(key) {
+            if (localStorage) { localStorage.removeItem(prefix + key); }
+        }
+        function loadstorage(key, namexx) {
+            if (localStorage) {
+                var aux = localStorage.getItem(prefix + key);
+                if (aux) { eval(namexx + "=" + aux + ";"); }
+            }
+        }
+        function loadstoragetext(key, namexx) {
+            if (localStorage) {
+                var aux = localStorage.getItem(prefix + key);
+                if (aux) { eval(namexx + "='" + formatname(aux) + "';"); }
+            }
+        }
+        function savestorage(key, xx) {
+            if (localStorage) {
+                localStorage.setItem(prefix + key, xx);
+            }
+        }
+        //var xxxx=1;
+        //savestorage('xxxx',0);
+        //removestorage('xxxx');
+        //loadstorage('xxxx','xxxx');alert(xxxx);
+        loadstorage('cssscale', 'cssscale');//alert(cssscale);
+        loadstorage('cssscaley', 'cssscaley');//alert(cssscaley);
+        function sizescreen() {
+            var cssscale1 = 0.99 / cssscale, cssscaley1 = 0.99 / cssscaley;
+            var wx = parseInt(100 / cssscale) + "%";
+            var wy = parseInt(100 / cssscaley) + "%";
+            windx = parseInt(window.innerWidth / cssscale);
+            windy = parseInt(window.innerHeight / cssscaley);
+            document.getElementById("cesiumContainer").setAttribute("style",
+                "border: none;top:0px;left:0px;width:" + wx + ";height:" + wy + ";-ms-transform: scale(" + cssscale1 + "," + cssscaley1 + "); /* IE 9 */-webkit-transform: scale(" + cssscale + "," + cssscaley + "); /* Chrome, Safari, Opera */transform: scale(" + cssscale + "," + cssscaley + ");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+            document.getElementById("credit").setAttribute("style",
+                "border: none;position:absolute;top:" + parseInt(window.innerHeight - 39) + "px;left:0px;width:95%;height:35px;");
+        }
+        sizescreen();
+        function subcssscale() {
+            var crlf = String.fromCharCode(10), msg = "";
+            var cssx0 = cssscale, cssy0 = cssscaley;
+            if (cssscale <= 1) {
+                cssscale = 1.4;
+            } else if (cssscale <= 1.4 + 0.01) {
+                cssscale = 2.0;
+            } else if (cssscaley <= 1) {
+                cssscaley = 1.2;
+            } else if (cssscaley <= 1.2 + 0.01) {
+                cssscaley = 1.4;
+            } else if (cssscaley <= 1.4 + 0.01) {
+                cssscaley = 1.7;
+            } else if (cssscaley <= 1.7 + 0.01) {
+                cssscaley = 2.0;
+            } else if (cssscale <= 2.0 + 0.01) {
+                cssscale = 2.5;
+            } else { cssscale = 1; cssscaley = 1; }
+            msg = "cssscalex=" + cssscale;
+            if (cssscale == 1) { msg += " normal"; }
+            if (Math.abs(cssscale - 1.4) < 0.01) { msg += " lowerres,faster"; }
+            if (Math.abs(cssscale - 2.0) < 0.01) { msg += " more lowerres,faster"; }
+            if (Math.abs(cssscale - 2.5) < 0.01) { msg += " more lowerres,faster"; }
+            msg += crlf + "cssscaley=" + cssscaley;
+            if (cssscaley == 1) { msg += " normal"; }
+            if (Math.abs(cssscaley - 1.2) < 0.01) { msg += " lowerres,faster"; }
+            if (Math.abs(cssscaley - 1.4) < 0.01) { msg += " more lowerres,faster"; }
+            if (Math.abs(cssscaley - 1.7) < 0.01) { msg += " more lowerres,faster"; }
+            if (Math.abs(cssscaley - 2.0) < 0.01) { msg += " more lowerres,faster"; }
+
+            if (confirm("set cssscale to " + crlf + crlf + msg + crlf + "?")) {
+                sizescreen();
+            } else { cssscale = cssx0; cssscaley = cssy0; }
+            subfocus();
+        }
+        var myviewer, myCesium, myellipsoid, shadowmap, myclock, mydate, okinit = 0;
+        function startup(Cesium) {
+            'use strict';
+            //Sandcastle_Begin
+            //var viewer = new Cesium.CesiumWidget('cesiumContainer');//,{
+            var viewer = new Cesium.Viewer('cesiumContainer', {
+                //scene3DOnly:true,
+                animation: false,
+                baseLayerPicker: false,
+                //CesiumWidget
+                geocoder: false,
+                navigationHelpButton: false,
+                fullscreenButton: false,
+                homeButton: false,
+                sceneModePicker: false,
+                timeline: false,
+                creditContainer: document.getElementById("credit"),
+                shadows: false,
+                terrainShadows: false,
+                contextOptions: { webgl: { alpha: false, depth: true, stencil: false, antialias: true, premultipliedAlpha: true, preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: false }, allowTextureFilterAnisotropic: true }
+            }
+            );
+            myviewer = viewer;
+            myCesium = Cesium;
+            //myviewer.Scene.contextOptions.webgl.alpha=true;
+            //myviewer.Scene.creditContainer=document.getElementById("credit");
+            cesiumTerrainProviderMeshes = Cesium.createWorldTerrain();
+            // setup alternative terrain providers
+            ellipsoidProvider = new Cesium.EllipsoidTerrainProvider({
+                requestWaterMask: true,
+                requestVertexNormals: true
+            });
+
+            vrTheWorldProvider = new Cesium.VRTheWorldTerrainProvider({
+                url: 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+                requestWaterMask: true,
+                requestVertexNormals: true,
+                credit: 'Terrain data courtesy VT MÄK'
+            });
+            iterrain = 0; loadstorage('iterrain', 'iterrain');
+            document.getElementById('terrain').selectedIndex = iterrain;
+            if (iterrain == 0) { myviewer.terrainProvider = cesiumTerrainProviderMeshes; }
+            if (iterrain == 1) { myviewer.terrainProvider = ellipsoidProvider; }
+            if (iterrain == 2) { myviewer.terrainProvider = vrTheWorldProvider; }
+            viewer.scene.globe.enableLighting = false;
+            viewer.scene.fog.enabled = false;
+
+            /*shadowmap = viewer.shadowMap;
+            shadowmap.maxmimumDistance = 4000.0;
+            shadowmap.size=1024;
+            shadowmap.cascadesEnabled=false;
+            shadowmap.darkness=0.33;
+            //shadowmap.isPointLight=true;
+            tshadow=0;loadstorage('tshadow','tshadow');
+            if(tshadow==1){shadowmap.enabled=true;}else{shadowmap.enabled=false;}
+            */
+            mydate = new Date();
+            myclock = new myCesium.JulianDate.fromDate(mydate);
+            //mydate.setHours(17);mydate.setMinutes(45);
+            myclock = myCesium.JulianDate.fromDate(mydate);
+            viewer.clock.currentTime = myclock;
+
+            Sandcastle.addToolbarButton('Lighting', function () {
+                viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
+            }, 'toggleLighting');
+
+            Sandcastle.addToolbarButton('fog', function () {
+                viewer.scene.fog.enabled = !viewer.scene.fog.enabled;
+            }, 'fog');
+
+            var scene = viewer.scene;
+            var canvas = viewer.canvas;
+            canvas.setAttribute('tabindex', '0'); // needed to put focus on the canvas
+            canvas.onclick = function () {
+                canvas.focus();
+            };
+            var ellipsoid = scene.globe.ellipsoid;
+            //var ellipsoid = viewer.scene.mapProjection.ellipsoid;
+            myellipsoid = ellipsoid;
+            /*if(scene.skyBox){scene.skyBox.destroy();}
+            scene.skyBox = undefined;*/
+            //if(scene.sun){scene.sun.destroy();}
+            //scene.sun = undefined;
+            scene.backgroundColor = new Cesium.Color(0.4, 0.5, 1.0, 1.0);
+            scene.skyAtmosphere.show = false;
+
+
+            // disable the default event handlers
+            // scene.screenSpaceCameraController.enableRotate = false;
+            // scene.screenSpaceCameraController.enableTranslate = false;
+            // scene.screenSpaceCameraController.enableZoom = false;
+            // scene.screenSpaceCameraController.enableTilt = false;
+            // scene.screenSpaceCameraController.enableLook = false;
+            
+            viewer.clock.onTick.addEventListener(function (clock) {
+                
+                mytestkey();
+            });
+
+
+            //Sandcastle_End
+            Sandcastle.finishedLoading();
+            //san francisco
+
+            addaircraft();
+
+
+            // viewer.zoomTo(viewer.entities);
+            
+        var tframe = 0, tframe0 = 0, tfps = 30, fps = 10, dtime = 1, tmsg = 0, tskip = 0, itime = 0, avgfps = 10;
+        function mytestkey() {
+            // if (quit == 1) { return; }
+            itime += 1; if (itime > 10000) { itime = 0; }
+            tframe0 = tframe;
+            tframe = timer();
+            dtime = tframe - tframe0;
+            if (dtime > 180) { dtime = 180; }
+            tfps += (tframe - tframe0 - tfps) * 0.2;
+            if (tfps < 1) { tfps = 1; }
+            if (tfps > 1000) { tfps = 1000; }
+            fps = 1000 / tfps;
+            avgfps += (fps - avgfps) * Math.min(1.0, dtime * 0.001);
+            if (tframe > tmsg + 150) {
+                tmsg = tframe;
+                // document.getElementById('fps').innerHTML = "fps " + parseInt(avgfps);
+                // var msg = "x=" + parseInt(x * 100000) / 100000 + " y=" + parseInt(y * 100000) / 100000 + " z=" + parseInt(z);
+                // document.getElementById('msg').innerHTML = msg;
+                // var msg2 = "v=" + parseInt(v * 20) / 10 + " prop=" + parseInt(vrun * 100);
+                // msg2 += " o1=" + parseInt(o1) + " o2=" + parseInt(o2) + " o3=" + parseInt(o3);
+                // msg3 = "";
+                // if (flaps > 0) { msg3 += "flaps+" + flaps + " "; }
+                // if (tourelle == 1) { msg3 += "tourelle "; }
+                // if (auxvar) { msg3 += " aux=" + auxvar; }
+                // if (auxvar2) { msg3 += " aux2=" + auxvar2; }
+                // if (auxvar3) { msg3 += " aux3=" + auxvar3; }
+                // if (auxvar4) { msg3 += " aux4=" + auxvar4; }
+                // if (auxvar5) { msg3 += " aux5=" + auxvar5; }
+                // if (auxvar6) { msg3 += " aux6=" + auxvar6; }
+                // document.getElementById('msg2').innerHTML = msg2;
+                // document.getElementById('msg3').innerHTML = msg3;
+                // document.getElementById('msghttp').innerHTML = msghttp;
+                // document.getElementById('msghttp2').innerHTML = msghttp2;
+                // if (twebaudio == 1) { setvolume(); }
+            }
+            var d10 = 0.010 * dtime;
+            
+            moveplane();
+            
+            if (okinit >= 1 && spotb) {
+                
+
+            }
+        }
+        
+        function moveplane() {
+            var dt = dtime;
+            
+        }
+        
+        function myview() {//return;
+            
+        }
+        
+        }
+        var iterrain = 1;
+        var cesiumTerrainProviderMeshes, ellipsoidProvider, vrTheWorldProvider;
+        function subcomboterrain() {
+            iterrain = document.getElementById('terrain').selectedIndex;
+            myviewer.terrainProvider = cesiumTerrainProviderMeshes;
+        }
+        
+        var terrainquality = 5;
+        function subterrainquality() {
+            var aux = window.prompt("terrain quality : enter a number 1 .. 10 (last=" + terrainquality + ")");
+            if (aux.length == 0) { return; }
+            aux = Math.max(1, Math.min(10, parseInt(aux)));
+            if (aux >= 1 && aux <= 10) {
+                terrainquality = aux;
+                myCesium.TerrainProvider.heightmapTerrainQuality = aux / 10.0;
+            }
+        }
+        
+        var myentity, myentity2, scale = 40000.0 * 1000 / 360;
+        var aircraftx = 0, aircrafty = 0, aircraftz = 0, aircrafto1 = 0, aircrafto2 = 0, aircrafto3 = 0;
+        var aircraft2x = 0, aircraft2y = 0, aircraft2z = 0, aircraft2o1 = 0, aircraft2o2 = 0, aircraft2o3 = 0;
+        var mymesh, mygeometry;
+        var carrepositions = new Float64Array([
+            1.0, 50.0, 0.0,
+            1.0, 50.0, 100.0,
+            1.0, -50.0, 0.0,
+            1.0, 50.0, 100.0,
+            1.0, -50.0, 100.0,
+            1.0, -50.0, 0.0
+        ]);
+        var carretextcoords = new Float32Array([
+            0.0, 0.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0,
+            1.0, 0.0
+        ]);
+        var buildpositions = new Float64Array([
+            0.0, 50.0, 0.0,
+            0.0, 50.0, 100.0,
+            0.0, -50.0, 0.0,
+            0.0, 50.0, 100.0,
+            0.0, -50.0, 100.0,
+            0.0, -50.0, 0.0,
+
+            /*0.0, 50.0, 100.0,
+            30.0, 50.0, 100.0,
+            0.0, -50.0, 100.0,
+            30.0, 50.0, 100.0,
+            30.0, -50.0, 100.0,
+            0.0, -50.0, 0.0*/
+
+            1.0, 5.0, 0.0,
+            1.0, 5.0, 100.0,
+            30.0, 5.0, 0.0,
+            1.0, 5.0, 100.0,
+            30.0, 5.0, 100.0,
+            30.0, 5.0, 0.0
+        ]);
+        var buildtextcoords = new Float32Array([
+            0.0, 0.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0,
+            1.0, 0.0,
+
+            /*0.0, 0.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0,
+            1.0, 0.0 */
+            0.98, 0.98,
+            0.98, 1.0,
+            1.0, 0.98,
+            0.98, 1.0,
+            1.0, 1.0,
+            1.0, 0.98
+        ]);
+        var vertexCount = 0;
+        var vertexPositions = [];
+        var vertexTextureCoords = [];
+        function loadmygeometry(myobjtxt, scale) {
+            handleLoadedWorld(myobjtxt, scale);
+            return addmygeometry(vertexPositions, vertexTextureCoords);
+        }
+        function handleLoadedWorld(data, scale) {//,vertexposbuff,vertextextbuff) { 
+            var lines = data.split("\n");
+            vertexCount = 0;
+            vertexPositions = [];
+            vertexTextureCoords = [];
+            for (var i in lines) {
+                var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
+                if (vals.length == 5 && vals[0] != "//") {
+                    // It is a line describing a vertex; get X, Y and Z first
+                    vertexPositions.push(parseFloat(vals[0]) * scale);
+                    vertexPositions.push(parseFloat(vals[1]) * scale);
+                    vertexPositions.push(parseFloat(vals[2]) * scale);
+
+                    // And then the texture coords
+                    vertexTextureCoords.push(parseFloat(vals[3]));
+                    vertexTextureCoords.push(parseFloat(vals[4]));
+
+                    vertexCount += 1;
+                }
+            }
+        }
+        function addmygeometry(positions, textcoords) {
+            var mygeometry = new myCesium.Geometry({
+                attributes: {
+                    position: new myCesium.GeometryAttribute({
+                        componentDatatype: myCesium.ComponentDatatype.DOUBLE,
+                        componentsPerAttribute: 3,
+                        values: positions
+                    }),
+                    normal: new myCesium.GeometryAttribute({
+                        componentDatatype: myCesium.ComponentDatatype.FLOAT,
+                        componentsPerAttribute: 3,
+                        values: positions
+                    }),
+                    st: new myCesium.GeometryAttribute({
+                        componentDatatype: myCesium.ComponentDatatype.FLOAT,
+                        componentsPerAttribute: 2,
+                        values: textcoords
+                    })
+                },
+                primitiveType: myCesium.PrimitiveType.TRIANGLES,
+                boundingSphere: myCesium.BoundingSphere.fromVertices(positions)
+            });
+            return mygeometry;
+        }
+        function addmymesh(mygeometry, imageurl) {
+            //var modelMatrix = myCesium.Transforms.eastNorthUpToFixedFrame(
+            //    myCesium.Cartesian3.fromDegrees(x,y,z));
+            var mymesh = new myCesium.Primitive({
+                geometryInstances: new myCesium.GeometryInstance({
+                    geometry: mygeometry
+                }),
+                //modelMatrix : modelMatrix,
+                //debugShowBoundingVolume : true,
+                asynchronous: false,
+                cull: false,
+                show: true,
+                //castShadows : true,
+                //receiveShadows : false,
+                appearance: new myCesium.MaterialAppearance({
+                    //translucent : false,
+                    material: new myCesium.Material({
+                        fabric: {
+                            type: 'Image',
+                            uniforms: {
+                                image: imageurl//bousspng
+                            }
+                        }
+                    })
+                })
+            });
+            return mymesh;
+        }
+        var mybridgeredappearance, mybridgeorangeappearance, mybridgegreenappearance;
+        var mybuildappearance, mybuildappearance1, mybuildappearance2;
+        var sp;
+        function initmyappearance() {
+
+            mybridgeredappearance = new myCesium.MaterialAppearance({
+                //translucent : false,
+                //fragmentShaderSource : 
+                /*'varying vec3 v_positionEC;'+
+                'varying vec3 v_normalEC;'+
+                /*'varying vec3 v_tangentEC;'+
+                'varying vec3 v_binormalEC;'+
+                'varying vec2 v_st;'+
+                'void main(){'+
+                '    vec3 positionToEyeEC = -v_positionEC;'+ 
+                //'    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);'+
+                ''+
+                '    vec3 normalEC = normalize(v_normalEC);'+
+                //#ifdef FACE_FORWARD  
+                //'    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);'+
+                //#endif  
+                ''+
+                '    czm_materialInput materialInput;'+
+                '    materialInput.normalEC = normalEC;'+
+                //'    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;'+
+                //'    materialInput.positionToEyeEC = positionToEyeEC;'+
+                '    materialInput.st = v_st;'+
+                '    czm_material material = czm_getMaterial(materialInput);'+
+                '    if(material.alpha<0.5){discard;};'+
+                //#ifdef FLAT    
+                //'    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);'+
+                //#else  
+                '    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);'+
+                //#endif 
+                '}'
+                              ,
+                           /*fragmentshadersource
+                varying vec3 v_positionEC;
+                varying vec3 v_normalEC;
+                varying vec3 v_tangentEC;
+                varying vec3 v_binormalEC;
+                varying vec2 v_st;
+                
+                void main()
+                {
+                    vec3 positionToEyeEC = -v_positionEC; 
+                    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);
+                
+                    vec3 normalEC = normalize(v_normalEC);
+                #ifdef FACE_FORWARD
+                    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
+                #endif
+                
+                    czm_materialInput materialInput;
+                    materialInput.normalEC = normalEC;
+                    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;
+                    materialInput.positionToEyeEC = positionToEyeEC;
+                    materialInput.st = v_st;
+                    czm_material material = czm_getMaterial(materialInput);
+                    
+                #ifdef FLAT    
+                    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);
+                #else
+                    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);
+                #endif
+                }
+                */
+                /*vertexShaderSource:
+     attribute vec3 position3DHigh;
+     attribute vec3 position3DLow;
+     attribute vec3 normal;
+     attribute vec3 tangent;
+     attribute vec3 binormal;
+     attribute vec2 st;
+     
+     varying vec3 v_positionEC;
+     varying vec3 v_normalEC;
+     varying vec3 v_tangentEC;
+     varying vec3 v_binormalEC;
+     varying vec2 v_st;
+     
+     void main() 
+     {
+         vec4 p = czm_computePosition();
+     
+         v_positionEC = (czm_modelViewRelativeToEye * p).xyz;      // position in eye coordinates
+         v_normalEC = czm_normal * normal;                         // normal in eye coordinates
+         v_tangentEC = czm_normal * tangent;                       // tangent in eye coordinates
+         v_binormalEC = czm_normal * binormal;                     // binormal in eye coordinates
+         v_st = st;
+         
+         gl_Position = czm_modelViewProjectionRelativeToEye * p;
+     }		   //,*/
+                material: new myCesium.Material({
+                    fabric: {
+                        type: 'Image',
+                        uniforms: {
+                            image: mybridgepng
+                        }
+                    }
+                })
+            });
+            //alert(mybridgeredappearance.getFragmentShaderSource());
+            mybridgeorangeappearance = new myCesium.MaterialAppearance({
+                //translucent : false,
+                material: new myCesium.Material({
+                    fabric: {
+                        type: 'Image',
+                        uniforms: {
+                            image: mybridgeorangepng
+                        }
+                    }
+                })
+            });
+            mybuildappearance = new myCesium.MaterialAppearance({
+                //translucent : false,
+                material: new myCesium.Material({
+                    fabric: {
+                        type: 'Image',
+                        uniforms: {
+                            image: building128png
+                        }
+                    }
+                })
+            });
+            mybuildappearance1 = new myCesium.MaterialAppearance({
+                //translucent : false,
+                material: new myCesium.Material({
+                    fabric: {
+                        type: 'Image',
+                        uniforms: {
+                            image: building128blue2png
+                        }
+                    }
+                })
+            });
+            mybuildappearance2 = new myCesium.MaterialAppearance({
+                //translucent : false,
+                material: new myCesium.Material({
+                    fabric: {
+                        type: 'Image',
+                        uniforms: {
+                            image: building128bluepng
+                        }
+                    }
+                })
+            });
+        }
+        var jetgeometry, jetmesh, f14geometry, f14mesh, ballongeometry, ballonmesh;
+        var bridgegeometry, bridgemesh = [];
+        var nbridgemesh = 90, ibridgemesh = 0, bridgemeshid = [];
+        var bridgemeshx = [], bridgemeshy = [], bridgemeshz = [], bridgemeshdz = [], bridgemesho1 = [];
+        var bridgemeshscale = [], bridgemeshmatrix = [], bridgemeshzsol = [];
+        var bridgemeshscalex = [], bridgemeshscaley = [], bridgemeshscalez = [], bridgemeshcolor = [];
+        var mybridgeposition = [];
+        var carregeometry, carremesh;
+        var buildgeometry, buildmesh = [];
+        var nbuildmesh = 490, ibuildmesh = 0, buildmeshid = [], buildmeshh = [];
+        var buildmeshx = [], buildmeshy = [], buildmeshz = [], buildmeshdz = [], buildmesho1 = [];
+        var buildmeshscale = [], buildmeshmatrix = [], buildmeshzsol = [], buildmeshchanged = [];
+        var buildmeshscalex = [], buildmeshscaley = [], buildmeshscalez = [], buildmeshcolor = [];
+        var mybuildposition = [];
+        function createmymesh() {
+            var scale = 0.1;
+            jetgeometry = loadmygeometry(alphajetobjtxt, scale);//addmygeometry(positions,textcoords);
+            jetmesh = addmymesh(jetgeometry, alphajetjpg);
+            myviewer.scene.primitives.add(jetmesh);
+            scale = 0.09;
+            f14geometry = loadmygeometry(f14objtxt, scale);//addmygeometry(positions,textcoords);
+            f14mesh = addmymesh(f14geometry, f14jpg);
+            myviewer.scene.primitives.add(f14mesh);
+            scale = 0.16;
+            ballongeometry = loadmygeometry(ballonobjtxt, scale);//addmygeometry(positions,textcoords);
+            ballonmesh = addmymesh(ballongeometry, ballonjpg);
+            myviewer.scene.primitives.add(ballonmesh);
+            scale = 1;
+            carregeometry = addmygeometry(carrepositions, carretextcoords);
+            buildgeometry = addmygeometry(buildpositions, buildtextcoords);
+            //carremesh=addmymesh(carregeometry,building128png);
+            //myviewer.scene.primitives.add(carremesh);
+
+            var position = myCesium.Cartesian3.fromDegrees(x, y, z + 10, myellipsoid, myposition);
+            var heading = degtorad(aircrafto1);
+            var pitch = degtorad(aircrafto2);
+            var roll = degtorad(-aircrafto3);
+            var mymatrix = new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
+            jetmesh.modelMatrix = mymatrix;
+            f14mesh.modelMatrix = mymatrix;
+            //carremesh.modelMatrix= mymatrix;
+        }
+        function addbridgemesh() {
+            var scale = 1.0;
+            bridgegeometry = loadmygeometry(mybridgeobjtxt, scale);
+            for (var i = 0; i < nbridgemesh; i++) {
+                bridgemesh[i] = addmymesh(bridgegeometry, mybridgepng);
+                //bridgemesh[i].castShadows=false;
+                myviewer.scene.primitives.add(bridgemesh[i]);
+            }
+            initmyappearance();
+            for (var i = 0; i < nbridgemesh; i++) {
+                bridgemeshid[i] = 0;
+                bridgemeshx[i] = -180;//x;
+                bridgemeshy[i] = -89;//y+i*0.300*360/40000;
+                bridgemeshdz[i] = 5.0;
+                bridgemeshzsol[i] = zsol;
+                bridgemeshz[i] = zsol + bridgemeshdz[i];
+                bridgemesho1[i] = -90.0;
+                bridgemeshscalex[i] = 1.0;
+                bridgemeshscaley[i] = 1.0;
+                bridgemeshscalez[i] = 1.0;
+                bridgemeshscale[i] = new myCesium.Cartesian3(bridgemeshscalex[i], bridgemeshscaley[i], bridgemeshscalez[i]);
+                mybridgeposition[i] = new myCesium.Cartesian3.fromDegrees(bridgemeshx[i], bridgemeshy[i], bridgemeshz[i], myellipsoid);
+                var position = mybridgeposition[i];
+                var heading = degtorad(bridgemesho1[i]);
+                var pitch = degtorad(0.0);
+                var roll = degtorad(0.0);
+                bridgemeshmatrix[i] = new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
+                myCesium.Matrix4.multiplyByScale(
+                    myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll)),
+                    bridgemeshscale[i], bridgemeshmatrix[i]);
+                bridgemesh[i].modelMatrix = bridgemeshmatrix[i];
+                bridgemesh[i].show = false;
+                bridgemeshcolor[i] = 1;
+                if (bridgemeshcolor[i] == 1) { bridgemesh[i].appearance = mybridgeorangeappearance; }
+                else if (bridgemeshcolor[i] == 2) { bridgemesh[i].appearance = mybridgeredappearance; }
+            }
+        }
+        
+        function createModel(url, height) {
+            myviewer.entities.removeAll();
+
+            // createmymesh();
+            
+            var origin = new myCesium.Cartesian3.fromDegrees(fromLLH.lng, fromLLH.lat, fromLLH.height);
+            var target = new myCesium.Cartesian3.fromDegrees(toLLH.lng, toLLH.lat, toLLH.height);
+            
+            var direction = myCesium.Cartesian3.subtract(target, origin, new myCesium.Cartesian3());
+            const dibak = myCesium.Cartesian3.clone(direction);
+            myCesium.Cartesian3.normalize(direction, direction);
+            var rotationMatrix = myCesium.Transforms.rotationMatrixFromPositionVelocity(origin, direction);
+            orientation = myCesium.Quaternion.fromRotationMatrix(
+                rotationMatrix
+            )
+
+            var position2 = myCesium.Cartesian3.fromDegrees(fromLLH.lng, fromLLH.lat, fromLLH.height, myellipsoid);
+            var entity2 = myviewer.entities.add({
+                name: url,
+                position: position2,
+                orientation: orientation,
+                model: {
+                    uri: url,
+                    minimumPixelSize: 200,
+                    maximumScale: 200000
+                }
+            });
+            //entity2.model.castShadows = true;
+            //entity2.model.receiveShadows = false;
+            //myviewer.trackedEntity = entity2;
+            myentity2 = entity2;
+
+            myviewer.entities.add({
+                position: origin,
+                point : {
+                    color: myCesium.Color.GREENYELLOW,
+                    pixelSize: 20,
+                    outlineColor: myCesium.Color.WHITE,
+                    outlineWidth: 2
+                },
+                label: {
+                    text: 'Origin',
+                    pixelOffset: { x: 0, y: 20 },
+                    verticalOrigin: myCesium.VerticalOrigin.TOP
+                }
+            });
+
+            myviewer.entities.add({
+                position: target,
+                point : {
+                    color: myCesium.Color.GREENYELLOW,
+                    pixelSize: 20,
+                    outlineColor: myCesium.Color.WHITE,
+                    outlineWidth: 2
+                },
+                label: {
+                    text: 'Target',
+                    pixelOffset: { x: 0, y: 20 },
+                    verticalOrigin: myCesium.VerticalOrigin.TOP
+                }
+            });
+
+            const hpr = myCesium.HeadingPitchRoll.fromQuaternion(orientation);
+            // const cameraOr = myCesium.Transforms.headingPitchRollQuaternion(target, hpr);
+            console.log(hpr);
+            myviewer.camera.setView({
+                    destination: myCesium.Cartesian3.subtract(origin, dibak, new myCesium.Cartesian3()),
+                    orientation: {
+                        heading: -degtorad(-myCesium.Math.toDegrees(hpr.heading) + 75),
+                        pitch: hpr.pitch,
+                        roll: 0
+                    }
+                });
+                // myviewer.camera.lookAt(origin, cameraOr);
+        }
+        function addaircraft() {
+            createModel('http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', 300);
+        }
+        
+        
+       
+        if (typeof Cesium !== "undefined") {
+            startup(Cesium);
+        } else if (typeof require === "function") {
+            require(["Cesium"], startup);
+        }
+        
+        function myCesium_HeadingPitchRoll(heading, pitch, roll) {
+            if (myhpr == null) { myhpr = new myCesium.HeadingPitchRoll(heading, pitch, roll); }
+            else { myhpr = new myCesium.HeadingPitchRoll(heading, pitch, roll); }
+            return myhpr;
+        }
+
+        const fromLLH ={lat: 10.813179, lng: 106.6648883, height: 10000};
+        const toLLH = {lat: 10.913179,lng: 105.6648883, height: 100};
+        const loopTime = 1000;
+        const planeSpeed = 1000;
+
+        // setInterval(()=>{
+        //     if (!myviewer) {
+        //         return;
+        //     }
+        //     const realSpeed = planeSpeed / (loopTime/1000) / 1000000;
+        //     lat = Math.max(lat, Math.min(fromLLH.lat, toLLH.lat));
+        //     lng = Math.max(lng, Math.min(fromLLH.lng, toLLH.lng));
+            
+        //     lat = Math.min(lat, Math.max(fromLLH.lat, toLLH.lat));
+        //     lng = Math.min(lng, Math.max(fromLLH.lng, toLLH.lng));
+
+        //     lat += realSpeed; lng += realSpeed;
+
+        //     o2 = -4; o3 = 0; x = lng; y = lat; z = 300.0; setTimeout("setsun();", 4000);
+        //     myviewer.camera.setView({
+        //         destination: myCesium.Cartesian3.fromDegrees(lng, lat, z, myellipsoid, mydestination),
+        //         orientation: {
+        //             heading: degtorad(-o1 + 90),
+        //             pitch: degtorad(o2 - 6),
+        //             roll: degtorad(-o3)
+        //         }
+        //     });
+        //     setklon();
+        //     subfocus();
+
+        // }, loopTime)
+
+    </script>
+</body>
+
+</html>
