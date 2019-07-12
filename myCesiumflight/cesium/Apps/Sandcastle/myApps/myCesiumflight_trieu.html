@@ -42,6 +42,34 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             height: 98%;
             overflow: hidden;
         }
+        #toolbar .row {
+            display: flex;
+            width: 100%;
+        }
+        #toolbar .row .col {
+            display: flexbox;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+        #toolbar .row .col:only-child {
+            width: 100%;
+        }
+        #toolbar .row .col.size-2 {
+            width: calc(100%/12 * 2)
+        } 
+        #toolbar .row .col.size-3 {
+            width: calc(100%/12 * 3)
+        }
+        #toolbar .row .col.size-4 {
+            width: calc(100%/3)
+        }
+        #toolbar .row .col.size-5 {
+            width: calc(100%/12 * 5)
+        } 
+
+        .full-width {
+            width: 100%;
+        }
     </style>
     <!--div id="cesiumContainer" class="fullSize"></div-->
     <div id="cesiumContainer"></div>
@@ -49,55 +77,34 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
         <h1>Loading...</h1>
     </div>
     <div id="toolbar" style="position:absolute;top:0px;left:0px;z-index:300;">
-        <a id="toggleLighting"></a>
-        <a id="fog"></a>
-        <div>B,N => motor -/+</div>
-        <div>arrows => turn / H => help</div>
-        <div id="fps">fps</div>
-        <div id="msg">msg</div>
-        <div id="msg2">msg2</div>
-        <div id="msg3">msg3</div>
-        <div id="msghttp">msghttp</div>
-        <div id="msghttp2">msghttp2</div>
-        <div>
-            <select id="combo" onChange="subcombo();" onblur="" onfocus="">
-                <option id="flyto">flyto</option>
-                <option id="deauville marinas">deauville marinas</option>
-                <option id="deauville plage">deauville plage</option>
-                <option id="trouville plage">trouville plage</option>
-                <option id="nancy">nancy</option>
-                <option id="crickvenica">crickvenica</option>
-                <option id="paris tolbiac">paris tolbiac</option>
-                <option id="paris defense">paris defense</option>
-                <option id="ivry romain roland">ivry romain roland</option>
-                <option id="orsay">orsay</option>
-                <option id="le barcares">le barcares</option>
-                <option id="jerusalem">jerusalem</option>
-                <option id="marseille">marseille</option>
-                <option id="nice">nice</option>
-                <option id="arcachon">arcachon</option>
-                <option id="grenoble">grenoble</option>
-                <option id="san francisco">san francisco</option>
-                <option id="new york">new york</option>
-                <option id="atlanta">atlanta</option>
-                <option id="rio">rio</option>
-                <option id="hong kong">hong kong</option>
-                <option id="athenes">athenes</option>
-                <option id="perth">perth</option>
-                <option id="le caire">le caire</option>
-                <option id="washington">washington</option>
-                <option id="tajmahal">tajmahal</option>
-            </select>
+        <div class="row">
+            <div class="col size-2">Start Lat/Lon</div>
+            <div class="col size-4">
+                <input id="start_lat" class="full-width" />
+            </div>
+            <div class="col size-4">
+                <input id="start_lon" class="full-width" />
+            </div>
+            <div class="col size-2">
+                <input id="start_height" class="full-width" />
+            </div>
         </div>
-        <div>
-            <select id="terrain" onChange="subcomboterrain();" onblur="" onfocus="">
-                <option id="stk">stk terrain</option>
-                <option id="ellipsoid">ellipsoid</option>
-                <option id="vrterrain">vr terrain</option>
-            </select>
+        <div class="row">
+            <div class="col size-2">End Lat/Lon</div>
+            <div class="col size-4">
+                <input id="end_lat" class="full-width" />
+            </div>
+            <div class="col size-4">
+                <input id="end_lon" class="full-width" />
+            </div>
+            <div class="col size-2">
+                <input id="end_height" class="full-width" />
+            </div>
         </div>
-        <div id="msgradio" style="width:220px;">msgradio</div>
-        <br />
+        <div class="row">
+            <button class="btn" id="setStartEnd" onclick="setStartEnd()">Set Start/End</button>
+            <button class="btn" id="setCameramode" onclick="setCameramode()">Change camera mode</button>
+        </div>
     </div>
     <div id="credit" style="position:absolute;top:400px;left:0px;width:420px;"></div>
     <div id="mapdiv" style="position:absolute;top:4028px;left:0px;width:97%;height:95%;">
@@ -374,6 +381,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             subfocus();
         }
         var myviewer, myCesium, myellipsoid, shadowmap, myclock, mydate, okinit = 0;
+        let PLane = null;
         function startup(Cesium) {
             'use strict';
             Workspace.load(Cesium);
@@ -414,7 +422,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
                 credit: 'Terrain data courtesy VT MÄK'
             });
             iterrain = 0; loadstorage('iterrain', 'iterrain');
-            document.getElementById('terrain').selectedIndex = iterrain;
+            // document.getElementById('terrain').selectedIndex = iterrain;
             if (iterrain == 0) { myviewer.terrainProvider = cesiumTerrainProviderMeshes; }
             if (iterrain == 1) { myviewer.terrainProvider = ellipsoidProvider; }
             if (iterrain == 2) { myviewer.terrainProvider = vrTheWorldProvider; }
@@ -436,13 +444,13 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             myclock = myCesium.JulianDate.fromDate(mydate);
             viewer.clock.currentTime = myclock;
 
-            Sandcastle.addToolbarButton('Lighting', function () {
-                viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
-            }, 'toggleLighting');
+            // Sandcastle.addToolbarButton('Lighting', function () {
+            //     viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
+            // }, 'toggleLighting');
 
-            Sandcastle.addToolbarButton('fog', function () {
-                viewer.scene.fog.enabled = !viewer.scene.fog.enabled;
-            }, 'fog');
+            // Sandcastle.addToolbarButton('fog', function () {
+            //     viewer.scene.fog.enabled = !viewer.scene.fog.enabled;
+            // }, 'fog');
 
             var scene = viewer.scene;
             var canvas = viewer.canvas;
@@ -468,9 +476,17 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             // scene.screenSpaceCameraController.enableTilt = false;
             // scene.screenSpaceCameraController.enableLook = false;
             
+            // viewer.zoomTo(viewer.entities);
+            const timeLoop = () => {
+                PLane.update();
+            }
+
+            PLane = addaircraft();
+
             viewer.clock.onTick.addEventListener(function (clock) {
                 
-                mytestkey();
+                // mytestkey();
+                timeLoop(clock);
             });
 
 
@@ -478,10 +494,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             Sandcastle.finishedLoading();
             //san francisco
 
-            addaircraft();
 
-
-            // viewer.zoomTo(viewer.entities);
             
         var tframe = 0, tframe0 = 0, tfps = 30, fps = 10, dtime = 1, tmsg = 0, tskip = 0, itime = 0, avgfps = 10;
         function mytestkey() {
@@ -1004,7 +1017,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
         }
         function addaircraft() {
             // createModel('http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', 300);
-            Workspace.start('http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', myviewer, fromLLH, toLLH);
+            return Workspace.createPlane('http://localhost:8080/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', myviewer, fromLLH, toLLH);
         }
         
         
@@ -1053,6 +1066,32 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 
         // }, loopTime)
 
+        const getValueTexbox = (id) => document.getElementById(id).value;
+        const inputIds = ["start_lat", "start_lon", "start_height", "end_lat", "end_lon", "end_height"];
+        const setStartEnd = () => {
+            const values = inputIds.map((id)=> ({value:getValueTexbox(id), id}));
+            const missValues = values.filter((input) => !input.value);
+            if (missValues.length > 0) {
+                const msg = `Please input values: ${missValues.map((input)=>input.id).join(",")}`;
+                alert(msg);
+                return;
+            }
+            try {
+                const [start_lat, start_lon, start_height, end_lat, end_lon, end_height] = values.map((ip)=>parseFloat(ip.value));
+                const startLLH = {lat: start_lat, lng: start_lon, height: start_height};
+                const endLLH = {lat: end_lat, lng: end_lon, height: end_height};
+                PLane.setStartEnd(startLLH, endLLH);
+            } catch(ex) {
+                console.log(ex);
+                alert(ex);
+            }
+        }
+
+        let isFollow = false;
+        const setCameramode = () => {
+            isFollow = !isFollow;
+            PLane.setCameraFollow(isFollow);
+        }
     </script>
 </body>
 
