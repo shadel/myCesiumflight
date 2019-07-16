@@ -51,15 +51,18 @@ Workspace.load = (Cesium) => {
     
         class Plane {
             constructor(url, viewer, start, end) {
-                this._start = start;
-                this._end = end;
+                const startHeight = viewer.scene.globe.getHeight(Cesium.Cartographic.fromDegrees(start.lng, start.lat));
+                const endHeight = viewer.scene.globe.getHeight(Cesium.Cartographic.fromDegrees(end.lng, end.lat));
+
+                this._start = {...start, height: start.height + (startHeight || 0), tHeight: start.height};
+                this._end = {...end, height: end.height + (endHeight || 0), tHeight: end.height};;
                 this._viewer = viewer;
                 this._url = url;
                 this._isFollowPlane = true;
     
                 this.addToViewer();
                 this._currentTime = new Date().getTime();
-                this._currentPosition = new myCesium.Cartesian3.fromDegrees(start.lng, start.lat, start.height, myellipsoid);
+                this._currentPosition = new myCesium.Cartesian3.fromDegrees(start.lng, start.lat, this._start.height, myellipsoid);
             }
     
             addToViewer() {
@@ -69,17 +72,24 @@ Workspace.load = (Cesium) => {
                 this._viewer.entities.removeAll();
 
                 const {position, orientation, direction, origin, target, rotationMatrix} = calcPlaneView(fromLLH, toLLH);
+
+                var start = this._viewer.clock.currentTime;
+
+                // set up the sampled position property
+                this._sampledPositionProperty = new Cesium.SampledPositionProperty();
+                this._sampledPositionProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
+                this._sampledPositionProperty.addSample(start, position);  // initial position
     
                 var entity2 = this._viewer.entities.add({
                     name: url,
-                    position: position,
+                    position: this._sampledPositionProperty,
                     orientation: orientation,
                     model: {
                         uri: url,
                         minimumPixelSize: 200,
                         maximumScale: 200000
                     },
-                    viewFrom: new myCesium.Cartesian3(-30, 0, 10),
+                    viewFrom: myCesium.Cartesian3.multiplyByScalar(new myCesium.Cartesian3(-10, 20, 10), 5, new myCesium.Cartesian3(-10, 20, 10)),
                 });
                 //entity2.model.castShadows = true;
                 //entity2.model.receiveShadows = false;
@@ -89,7 +99,7 @@ Workspace.load = (Cesium) => {
                 this._viewer.entities.add({
                     position: new myCesium.Cartesian3.fromDegrees(fromLLH.lng, fromLLH.lat, 0),
                     cylinder : {
-                        length: fromLLH.height,                                   
+                        length: fromLLH.tHeight,                                   
                         topRadius: 10.0,
                         bottomRadius: 10.0,
                         outline: false,
@@ -108,7 +118,7 @@ Workspace.load = (Cesium) => {
                 this._viewer.entities.add({
                     position: new myCesium.Cartesian3.fromDegrees(toLLH.lng, toLLH.lat, 0),
                     cylinder : {
-                        length: toLLH.height,                                   
+                        length: toLLH.tHeight,                                   
                         topRadius: 10.0,
                         bottomRadius: 10.0,
                         outline: false,
@@ -174,10 +184,10 @@ Workspace.load = (Cesium) => {
                     // console.log(this._line);
                     // const heading= -degtorad(-myCesium.Math.toDegrees(hpr.heading) + 75);
                     // const pitch= hpr.pitch;
-                    const range = 100;
-                    const heading= Cesium.Math.toRadians(135);
-                    const pitch= Cesium.Math.toRadians(0);
-                    this._viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(heading, pitch, range));
+                    // const range = 100;
+                    // const heading= Cesium.Math.toRadians(135);
+                    // const pitch= Cesium.Math.toRadians(0);
+                    // this._viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(heading, pitch, range));
                     // const direction=  myCesium.Cartesian3.normalize(stepback, stepback);
                     // this._entity.viewFrom = new myCesium.Cartesian3(-30, 0, 10);
                     // this._viewer.trackedEntity = this._entity;
@@ -236,19 +246,21 @@ Workspace.load = (Cesium) => {
                     //         color: Cesium.Color.RED
                     //     },
                     // });
-                    // console.log(this._line);
+                    
+                    // var truckPosition = Cesium.Matrix4.getTranslation(this._entity.modelMatrix, new Cesium.Cartesian3());
+                    // console.log(this._entity);
                     // const heading= -degtorad(-myCesium.Math.toDegrees(hpr.heading) + 75);
                     // const pitch= hpr.pitch;
-                    // const range = 100;
-                    // this._viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(135), 1, 1));
+                    // const range = 300;
+                    // this._viewer.camera.lookAt(this._entity.position, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(135), 1, range));
                     
-                    const range = 100;
-                    const heading= Cesium.Math.toRadians(0);
-                    const pitch= Cesium.Math.toRadians(0);
-                    this._viewer.zoomTo(this._entity, new Cesium.HeadingPitchRange(heading, pitch, range));
+                    // const range = 100;
+                    // const heading= Cesium.Math.toRadians(0);
+                    // const pitch= Cesium.Math.toRadians(0);
+                    // this._viewer.zoomTo(this._entity, new Cesium.HeadingPitchRange(heading, pitch, range));
                     // const direction=  myCesium.Cartesian3.normalize(stepback, stepback);
                     // this._entity.viewFrom = new myCesium.Cartesian3(-30, 0, 10);
-                    // this._viewer.trackedEntity = this._entity;
+                    this._viewer.trackedEntity = this._entity;
                     // console.log("this._entity.viewFrom", this._entity.viewFrom._value);
                     // this._viewer.zoomTo(this._entity);
                 } else {
@@ -288,7 +300,8 @@ Workspace.load = (Cesium) => {
                     rotationMatrix
                 )
 
-                this._entity.position = newPos;
+                this._sampledPositionProperty.addSample(this._viewer.clock.currentTime, newPos);
+                // this._entity.position = newPos;
                 this._entity.orientation = orientation;
                 
              this.updateView(newPos, orientation, dibak, rotationMatrix, target)
@@ -330,9 +343,13 @@ Workspace.load = (Cesium) => {
             }
 
             setStartEnd(start, end) {
-                this._start = start,
-                this._end = end;
-                this._currentPosition =  new myCesium.Cartesian3.fromDegrees(start.lng, start.lat, start.height, myellipsoid);;
+                const startHeight = this._viewer.scene.globe.getHeight(Cesium.Cartographic.fromDegrees(start.lng, start.lat));
+                const endHeight = this._viewer.scene.globe.getHeight(Cesium.Cartographic.fromDegrees(end.lng, end.lat));
+
+                this._start = {...start, height: start.height + (startHeight || 0), tHeight: start.height};
+                this._end = {...end, height: end.height + (endHeight || 0), tHeight: end.height};;
+
+                this._currentPosition =  new myCesium.Cartesian3.fromDegrees(start.lng, start.lat, this._start.height, myellipsoid);;
                 this.addToViewer();
             }
 
