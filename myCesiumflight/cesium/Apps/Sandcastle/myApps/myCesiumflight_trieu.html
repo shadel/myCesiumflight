@@ -80,25 +80,25 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
         <div class="row">
             <div class="col size-2">Start Lat/Lon</div>
             <div class="col size-4">
-                <input id="start_lat" class="full-width" />
+                <input id="start_lat" class="full-width" value="-27.4689474"/>
             </div>
             <div class="col size-4">
-                <input id="start_lon" class="full-width" />
+                <input id="start_lon" class="full-width" value="153.0233637"/>
             </div>
             <div class="col size-2">
-                <input id="start_height" class="full-width" />
+                <input id="start_height" class="full-width" value="300"/>
             </div>
         </div>
         <div class="row">
             <div class="col size-2">End Lat/Lon</div>
             <div class="col size-4">
-                <input id="end_lat" class="full-width" />
+                <input id="end_lat" class="full-width"  value="-28.0277371"/>
             </div>
             <div class="col size-4">
-                <input id="end_lon" class="full-width" />
+                <input id="end_lon" class="full-width"  value="153.3373624"/>
             </div>
             <div class="col size-2">
-                <input id="end_height" class="full-width" />
+                <input id="end_height" class="full-width" value="200"/>
             </div>
         </div>
         <div class="row">
@@ -400,6 +400,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
                 timeline: false,
                 creditContainer: document.getElementById("credit"),
                 shadows: false,
+                sceneMode: Cesium.SceneMode.SCENE3D,
                 terrainShadows: false,
                 contextOptions: { webgl: { alpha: false, depth: true, stencil: false, antialias: true, premultipliedAlpha: true, preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: false }, allowTextureFilterAnisotropic: true }
             }
@@ -426,7 +427,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             if (iterrain == 0) { myviewer.terrainProvider = cesiumTerrainProviderMeshes; }
             if (iterrain == 1) { myviewer.terrainProvider = ellipsoidProvider; }
             if (iterrain == 2) { myviewer.terrainProvider = vrTheWorldProvider; }
-            viewer.scene.globe.enableLighting = false;
+            viewer.scene.globe.enableLighting = true;
             viewer.scene.fog.enabled = false;
 
             /*shadowmap = viewer.shadowMap;
@@ -1033,9 +1034,9 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
             else { myhpr = new myCesium.HeadingPitchRoll(heading, pitch, roll); }
             return myhpr;
         }
-
-        const fromLLH ={lat: 10.813179, lng: 106.6648883, height: 10000};
-        const toLLH = {lat: 10.913179,lng: 105.6648883, height: 100};
+        
+        const fromLLH ={lng: 153.0233637,lat:  -27.4689474, height: 300};
+        const toLLH = {lng: 153.3373624,lat: -28.0277371, height: 200};
         const loopTime = 1000;
         const planeSpeed = 1000;
 
