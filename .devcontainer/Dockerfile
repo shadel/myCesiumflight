@@ -28,6 +28,7 @@ RUN apt-get update \
     #
     # Install eslint globally
     && npm install -g eslint \
+    && npm install -g http-server \
     #
     # Clean up
     && apt-get autoremove -y \
@@ -37,3 +38,5 @@ RUN apt-get update \
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
 EXPOSE 8080
+
+CMD ["http-server", "-p", "8080"]
